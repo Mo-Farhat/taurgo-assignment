@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:rbac_crud_app/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:rbac_crud_app/pages/partner_detail_page.dart';
+import 'package:rbac_crud_app/auth.dart';
+import 'package:rbac_crud_app/pages/partner_detail_page.dart'; // Import PartnerDetailPage
 
 class ClientDashboard extends StatefulWidget {
   @override
@@ -13,7 +13,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String _displayName = '';
-  List<String> _servicesInterested = [];
   List<String> _connectedPartners = [];
 
   @override
@@ -31,12 +30,99 @@ class _ClientDashboardState extends State<ClientDashboard> {
     if (clientDoc.exists) {
       setState(() {
         _displayName = clientDoc['displayName'] ?? '';
-        _servicesInterested =
-            List<String>.from(clientDoc['servicesInterested'] ?? []);
         _connectedPartners =
             List<String>.from(clientDoc['connectedPartners'] ?? []);
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Client Dashboard')),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('partners')
+            .snapshots(), // Listen to real-time updates for partners
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return Center(child: Text("No available partners"));
+          }
+
+          var partners = snapshot.data!.docs.map((doc) {
+            return {
+              'partnerId': doc.id,
+              'companyName': doc['companyName'],
+            };
+          }).toList();
+
+          return ListView.builder(
+            itemCount: partners.length,
+            itemBuilder: (context, index) {
+              var partner = partners[index];
+              var partnerId = partner['partnerId'];
+              var companyName = partner['companyName'];
+
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: ListTile(
+                  title: Text(companyName),
+                  subtitle: _buildPartnerServicesStream(partnerId),
+                  trailing: _connectedPartners.contains(partnerId)
+                      ? IconButton(
+                          icon: Icon(Icons.remove_circle_outline),
+                          onPressed: () => _disconnectFromPartner(partnerId),
+                        )
+                      : IconButton(
+                          icon: Icon(Icons.add_circle_outline),
+                          onPressed: () => _connectWithPartner(partnerId),
+                        ),
+                  onTap: () {
+                    // Navigate to the partner detail page when clicked
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PartnerDetailPage(partner: partner),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  // Build Stream for services offered by a partner
+  Widget _buildPartnerServicesStream(String partnerId) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore.collection('partners').doc(partnerId).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text('Loading services...');
+        }
+
+        if (!snapshot.hasData || snapshot.data == null) {
+          return Text('No services available');
+        }
+
+        var services =
+            List<String>.from(snapshot.data!['servicesOffered'] ?? []);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: services.map<Widget>((service) {
+            return Text(service);
+          }).toList(),
+        );
+      },
+    );
   }
 
   // Connect with partner
@@ -69,75 +155,5 @@ class _ClientDashboardState extends State<ClientDashboard> {
     } catch (e) {
       print("Error disconnecting from partner: $e");
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Client Dashboard')),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('partners').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text("No available partners"));
-          }
-
-          var partners = snapshot.data!.docs.map((doc) {
-            return {
-              'partnerId': doc.id,
-              'companyName': doc['companyName'],
-              'servicesOffered':
-                  List<String>.from(doc['servicesOffered'] ?? []),
-            };
-          }).toList();
-
-          return ListView.builder(
-            itemCount: partners.length,
-            itemBuilder: (context, index) {
-              var partner = partners[index];
-              var partnerId = partner['partnerId'];
-              var companyName = partner['companyName'];
-              var servicesOffered = partner['servicesOffered'];
-
-              return Card(
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: ListTile(
-                  title: Text(companyName),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: servicesOffered.map<Widget>((service) {
-                      return Text(service);
-                    }).toList(),
-                  ),
-                  trailing: _connectedPartners.contains(partnerId)
-                      ? IconButton(
-                          icon: Icon(Icons.remove_circle_outline),
-                          onPressed: () => _disconnectFromPartner(partnerId),
-                        )
-                      : IconButton(
-                          icon: Icon(Icons.add_circle_outline),
-                          onPressed: () => _connectWithPartner(partnerId),
-                        ),
-                  onTap: () {
-                    // Navigate to the partner detail page when clicked
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            PartnerDetailPage(partner: partner),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
   }
 }

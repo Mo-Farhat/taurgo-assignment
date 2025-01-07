@@ -91,12 +91,7 @@ class _PartnerDashboardState extends State<PartnerDashboard> {
                     setState(() {
                       // Add the service and update Firestore
                       services.add(_serviceController.text);
-                      FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(_authService.currentUser!.uid)
-                          .update({
-                        'servicesOffered': services,
-                      });
+                      _updateServicesInFirestore();
                     });
                     Navigator.pop(context); // Close the dialog
                   }
@@ -111,14 +106,13 @@ class _PartnerDashboardState extends State<PartnerDashboard> {
                   if (services.contains(serviceToRemove)) {
                     setState(() {
                       services.remove(serviceToRemove);
-                      FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(_authService.currentUser!.uid)
-                          .update({
-                        'servicesOffered': services,
-                      });
+                      _updateServicesInFirestore();
                     });
                     Navigator.pop(context); // Close the dialog
+                  } else {
+                    // Show message if service doesn't exist
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Service not found")));
                   }
                 },
                 child: Text('Remove Service'),
@@ -128,5 +122,19 @@ class _PartnerDashboardState extends State<PartnerDashboard> {
         );
       },
     );
+  }
+
+  // Helper function to update services in Firestore
+  Future<void> _updateServicesInFirestore() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_authService.currentUser!.uid)
+          .update({
+        'servicesOffered': services,
+      });
+    } catch (e) {
+      print("Error updating services: $e");
+    }
   }
 }
