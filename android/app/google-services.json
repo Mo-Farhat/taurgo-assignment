@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "846547948955",
+    "project_id": "rbac-taurgo",
+    "storage_bucket": "rbac-taurgo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:846547948955:android:82fa194e4c31bd690f3d3e",
+        "android_client_info": {
+          "package_name": "com.rbac.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-at_za7-p-qLZPiD5AGS0bNZTSfdenUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:846547948955:android:06113b4fd81c8e200f3d3e",
+        "android_client_info": {
+          "package_name": "com.example.rbac_crud_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-at_za7-p-qLZPiD5AGS0bNZTSfdenUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
