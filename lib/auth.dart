@@ -110,4 +110,28 @@ class AuthService {
       rethrow;
     }
   }
+
+  // AuthService class update
+  Future<void> createSuperAdmin(String email, String password) async {
+    try {
+      UserCredential userCredential =
+          await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      String uid = userCredential.user!.uid;
+
+      await _firestore.collection('users').doc(uid).set({
+        'email': email,
+        'role': 'SuperAdmin',
+        'createdAt': Timestamp.now(),
+      });
+
+      print("SuperAdmin created successfully!");
+    } catch (e) {
+      print("Error creating SuperAdmin: $e");
+      rethrow;
+    }
+  }
 }

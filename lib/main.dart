@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:rbac_crud_app/firebase_options.dart';
-import 'package:rbac_crud_app/pages/client_dashboard.dart';
-import 'package:rbac_crud_app/pages/client_register_page.dart';
-import 'package:rbac_crud_app/pages/home_page.dart';
-import 'package:rbac_crud_app/pages/partner_dashboard.dart';
-import 'package:rbac_crud_app/pages/partner_detail_page.dart';
-import 'package:rbac_crud_app/pages/partner_register_page.dart';
+import 'package:rbac_crud_app/views/client_dashboard.dart';
+import 'package:rbac_crud_app/views/client_register_page.dart';
+import 'package:rbac_crud_app/views/home_page.dart';
+import 'package:rbac_crud_app/views/partner_dashboard.dart';
+import 'package:rbac_crud_app/views/partner_detail_page.dart';
+import 'package:rbac_crud_app/views/partner_register_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
